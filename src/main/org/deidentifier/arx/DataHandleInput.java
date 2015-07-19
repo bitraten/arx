@@ -35,7 +35,7 @@ import org.deidentifier.arx.framework.data.Dictionary;
 public class DataHandleInput extends DataHandle {
 
     /** The data. */
-    protected int[][]    data       = null;
+    public int[][]    data       = null;
 
     /** The dictionary. */
     protected Dictionary dictionary = null;

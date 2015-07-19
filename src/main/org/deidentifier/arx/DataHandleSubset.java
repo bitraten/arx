@@ -181,7 +181,7 @@ public class DataHandleSubset extends DataHandle {
      *
      * @return
      */
-    protected DataHandle getSource(){
+    public DataHandle getSource(){
         return source;
     }
 

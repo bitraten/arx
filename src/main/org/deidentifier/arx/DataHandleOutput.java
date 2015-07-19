@@ -105,7 +105,7 @@ public class DataHandleOutput extends DataHandle {
     private ARXNode      node;
 
     /** The data. */
-    private Data         outputGeneralized;
+    public Data         outputGeneralized;
 
     /** The data. */
     private Data         outputMicroaggregated;
