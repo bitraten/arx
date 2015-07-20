@@ -293,6 +293,28 @@ public class RiskEstimateBuilder {
         return new RiskModelSampleUniqueness(getEquivalenceClassModel());
     }
 
+    public RiskModelAttributesQI getQIRisks() {
+
+        return new RiskModelAttributesQI(this.identifiers, this.stop, progress) {
+            @Override
+            protected RiskProvider
+                    getRiskProvider(final Set<String> attributes,
+                                    final WrappedBoolean stop) {
+                RiskModelQI riskModel = new RiskModelQI(handle, attributes);
+
+                return new RiskProvider() {
+                    public double getAlphaDistinct() {
+                        return riskModel.getAlphaDistinct();
+                    }
+
+                    public double getAlphaSeparation(){
+                        return riskModel.getAlphaSeparation();
+                    }
+                };
+            }
+        };
+    }
+
     /**
      * Returns a class providing access to population- or sample-based risk
      * estimates about the attributes

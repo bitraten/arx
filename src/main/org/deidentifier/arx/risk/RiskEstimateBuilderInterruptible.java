@@ -155,6 +155,15 @@ public class RiskEstimateBuilderInterruptible {
         }
     }
 
+    public RiskModelAttributesQI
+			getQIRisks() throws InterruptedException {
+        try {
+            return parent.getQIRisks();
+        } catch (ComputationInterruptedException e) {
+            throw new InterruptedException("Computation interrupted");
+        }
+}
+
     /**
      * Interrupts all computations. Raises an InterruptedException.
      */
