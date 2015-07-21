@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,10 @@ public abstract class RiskModelAttributesQI {
         public Set<String> getIdentifier() {
             return identifier;
         }
+        
+        public boolean isQI() {
+        	return getAlphaSeparation() > 0.3;
+        }
     }
 
     /**
@@ -81,6 +86,8 @@ public abstract class RiskModelAttributesQI {
     private final QuasiIdentifierRisk[] risks;
     /** Result */
     private final int                   numIdentifiers;
+    /** Result */
+    private final Set<String>           identifiers;
 
     /**
      * Creates a new instance
@@ -93,19 +100,45 @@ public abstract class RiskModelAttributesQI {
                         WrappedInteger percentageDone) {
         this.stop = stop;
         this.numIdentifiers = identifiers.size();
+        this.identifiers = identifiers;
 
-        // Compute risk estimates for all elements in the power set
-        Set<Set<String>> powerset = getPowerSet(identifiers);
+        Set<Set<String>> quasiIdentifiers = new HashSet<Set<String>>();
+        Set<Set<String>> candidates = new HashSet<Set<String>>();        
+
+        for(String identifier : this.identifiers) {
+        	Set<String> candidate = new HashSet<String>();
+        	candidate.add(identifier);
+        	candidates.add(candidate);
+        }
+        
         Map<Set<String>, QuasiIdentifierRisk> scores = new HashMap<Set<String>, QuasiIdentifierRisk>();
-        int done = 0;
-        for (Set<String> set : powerset) {
+        int l = 1;
+        
+        while(!candidates.isEmpty()) {
             checkInterrupt();
-            if (!set.isEmpty()) {
-                scores.put(set, new QuasiIdentifierRisk(set));
-                percentageDone.value = (int) Math.round((double) done++ /
-                                                        (double) (powerset.size() - 1) *
-                                                        100d);
-            }
+        	
+        	// Calculate quasiIdentifier measures
+        	for (Set<String> candidate : candidates) {
+        			QuasiIdentifierRisk cRisk = new QuasiIdentifierRisk(candidate);
+        			scores.put(candidate, cRisk);
+        			if(cRisk.isQI()) {
+        				quasiIdentifiers.add(candidate);
+        			}
+        	}
+        	l++;
+        	candidates = getCandidateSet(candidates, l);
+        	
+        	// Filter out supersets of already found QIs
+        	Iterator<Set<String>> iter = candidates.iterator();
+        	while (iter.hasNext()) {
+        		Set<String> candidate = iter.next();
+        		for(Set<String> qi : quasiIdentifiers) {
+        			if(candidate.containsAll(qi)) {
+        				iter.remove();
+        				break;
+        			}
+        		}
+        	}
         }
 
         // Now create sorted array
@@ -142,6 +175,21 @@ public abstract class RiskModelAttributesQI {
         if (stop.value) { throw new ComputationInterruptedException(); }
     }
 
+    private Set<Set<String>> getCandidateSet(Set<Set<String>> previous, int length) {
+    	Set<Set<String>> candidates = new HashSet<Set<String>>();
+    	
+    	for (Set<String> p : previous) {
+    		for(String i : identifiers) {
+        		Set<String> candidate = new HashSet<String>(p);
+    			candidate.add(i);
+    			if(candidate.size() == length) {
+    				candidates.add(candidate);
+    			}
+    		}
+    	}
+    	return candidates;
+    }
+    
     /**
      * Returns the power set
      * 
