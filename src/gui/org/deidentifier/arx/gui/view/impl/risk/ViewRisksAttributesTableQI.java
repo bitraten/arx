@@ -19,8 +19,11 @@ package org.deidentifier.arx.gui.view.impl.risk;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.deidentifier.arx.AttributeType;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.ModelEvent;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
@@ -58,6 +61,8 @@ public class ViewRisksAttributesTableQI extends ViewRisks<AnalysisContextRisk> {
 
     /** Internal stuff. */
     private AnalysisManager   manager;
+    
+    private Controller		  controller;
 
     /**
      * Creates a new instance.
@@ -76,6 +81,7 @@ public class ViewRisksAttributesTableQI extends ViewRisks<AnalysisContextRisk> {
         controller.addListener(ModelPart.SELECTED_QUASI_IDENTIFIERS, this);
         controller.addListener(ModelPart.POPULATION_MODEL, this);
         this.manager = new AnalysisManager(parent.getDisplay());
+        this.controller = controller;
     }
     
     @Override
@@ -198,10 +204,26 @@ public class ViewRisksAttributesTableQI extends ViewRisks<AnalysisContextRisk> {
                     i.dispose();
                 }
 
+                Set<String> foundQIs = new HashSet<String>();
+                
                 // For all sizes
                 for (QuasiIdentifierRisk item : risks.getAttributeRisks()) {
+                	
+                	// Add found quasi-identifiers to set, if they were filtered by a threshold.
+                	if(!context.context.getModel().getShowAll()) {
+                    	foundQIs.addAll(item.getIdentifier());
+                	}
                     createItem(item);
                 }
+                
+				// Mark found quasi-identifiers as identifying.
+				for (String qi : foundQIs) {
+					context.context.getModel().getInputDefinition().setAttributeType(qi, AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
+					// Update the views
+					controller.update(new ModelEvent(this,
+									  ModelPart.ATTRIBUTE_TYPE,
+									  qi));
+				}
 
                 for (final TableColumn col : table.getColumns()) {
                     col.pack();
@@ -231,8 +253,16 @@ public class ViewRisksAttributesTableQI extends ViewRisks<AnalysisContextRisk> {
 
                 // Timestamp
                 long time = System.currentTimeMillis();
-
-                risks = builder.getQIRisks();
+                
+                if(!context.context.getModel().getQiThresholdsSet()) {
+                	// Standard Values
+                	context.context.getModel().setQIThresholds(0.6, 0.8, false);
+                }
+                
+                risks = builder.getQIRisks(context.context.getModel().getShowAll(),
+					   	   context.context.getModel().getDistinctThreshold(),
+					   	   context.context.getModel().getSeparationThreshold()
+					   	  );
 
                 // Our users are patient
                 while (System.currentTimeMillis() - time < MINIMAL_WORKING_TIME && !stopped) {

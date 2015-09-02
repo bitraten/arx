@@ -293,9 +293,9 @@ public class RiskEstimateBuilder {
         return new RiskModelSampleUniqueness(getEquivalenceClassModel());
     }
 
-    public RiskModelAttributesQI getQIRisks() {
+    public RiskModelAttributesQI getQIRisks(boolean showAll, double distinctThreshold, double separationThreshold) {
 
-        return new RiskModelAttributesQI(this.identifiers, this.stop, progress) {
+        return new RiskModelAttributesQI(this.identifiers, this.stop, progress, showAll, distinctThreshold, separationThreshold) {
             @Override
             protected RiskProvider
                     getRiskProvider(final Set<String> attributes,

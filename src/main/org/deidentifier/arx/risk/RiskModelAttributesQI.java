@@ -65,7 +65,7 @@ public abstract class RiskModelAttributesQI {
         }
         
         public boolean isQI() {
-        	return getAlphaSeparation() > 0.3;
+        	return getAlphaSeparation() >= separationThreshold || getAlphaDistinct() >= distinctThreshold;
         }
     }
 
@@ -88,6 +88,9 @@ public abstract class RiskModelAttributesQI {
     private final int                   numIdentifiers;
     /** Result */
     private final Set<String>           identifiers;
+    private boolean showAll;
+    private double distinctThreshold;
+    private double separationThreshold;
 
     /**
      * Creates a new instance
@@ -97,10 +100,16 @@ public abstract class RiskModelAttributesQI {
      */
     RiskModelAttributesQI(Set<String> identifiers,
                         WrappedBoolean stop,
-                        WrappedInteger percentageDone) {
+                        WrappedInteger percentageDone,
+                        boolean showAll,
+                        double distinctThreshold,
+                        double separationThreshold) {
         this.stop = stop;
         this.numIdentifiers = identifiers.size();
         this.identifiers = identifiers;
+        this.showAll = showAll;
+        this.distinctThreshold = distinctThreshold;
+        this.separationThreshold = separationThreshold;
 
         Set<Set<String>> quasiIdentifiers = new HashSet<Set<String>>();
         Set<Set<String>> candidates = new HashSet<Set<String>>();        
@@ -120,7 +129,7 @@ public abstract class RiskModelAttributesQI {
         	// Calculate quasiIdentifier measures
         	for (Set<String> candidate : candidates) {
         			QuasiIdentifierRisk cRisk = new QuasiIdentifierRisk(candidate);
-        			if(cRisk.isQI()) {
+        			if(cRisk.isQI() || showAll) {
         				scores.put(candidate, cRisk);
         				quasiIdentifiers.add(candidate);
         			}
@@ -130,7 +139,7 @@ public abstract class RiskModelAttributesQI {
         	
         	// Filter out supersets of already found QIs
         	Iterator<Set<String>> iter = candidates.iterator();
-        	while (iter.hasNext()) {
+        	while (!showAll && iter.hasNext()) {
         		Set<String> candidate = iter.next();
         		for(Set<String> qi : quasiIdentifiers) {
         			if(candidate.containsAll(qi)) {
