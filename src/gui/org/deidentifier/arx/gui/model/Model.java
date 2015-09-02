@@ -254,6 +254,14 @@ public class Model implements Serializable {
      ******************************************/
     private Set<String>                           selectedQuasiIdentifiers        = null;
     
+    private double 								  distinctThreshold;
+    
+    private double								  separationThreshold;
+    
+    private boolean								  showAll						  = false;
+    
+    private boolean								  qiThresholdsSet				  = false;
+    
     /**
      * Creates a new instance.
      *
@@ -502,6 +510,15 @@ public class Model implements Serializable {
      */
 	public String getDescription() {
 		return description;
+	}
+	
+	/**
+     * Returns the alpha-distinct threshold.
+	 * 
+	 * @return
+	 */
+	public double getDistinctThreshold() {
+		return this.distinctThreshold;
 	}
 
 	/**
@@ -779,6 +796,15 @@ public class Model implements Serializable {
         }
         return perspective;
     }
+    
+    /**
+     * Returns true if the quasi-identifier thresholds are set.
+     * 
+     * @return
+     */
+    public boolean getQiThresholdsSet() {
+    	return this.qiThresholdsSet;
+    }
 
 	/**
      * Returns the current query.
@@ -884,6 +910,15 @@ public class Model implements Serializable {
         return this.selectedQuasiIdentifiers;
     }
 
+    /**
+     * Returns the alpha-separation threshold.
+     * 
+     * @return
+     */
+    public double getSeparationThreshold() {
+    	return this.separationThreshold;
+    }
+    
 	/**
      * Returns the separator.
      *
@@ -891,6 +926,15 @@ public class Model implements Serializable {
      */
 	public char getSeparator() {
 		return separator;
+	}
+	
+	/**
+	 * Returns the boolean showAll (Identifiers)
+	 * 
+	 * @return
+	 */
+	public boolean getShowAll() {
+		return showAll;
 	}
 
     /**
@@ -1051,6 +1095,8 @@ public class Model implements Serializable {
         selectedQuasiIdentifiers = null;
         subsetOrigin = Resources.getMessage("Model.0"); //$NON-NLS-1$
         groups = null;
+        showAll = false;
+        qiThresholdsSet = false;
 	}
 
 	/**
@@ -1291,6 +1337,20 @@ public class Model implements Serializable {
      */
     public void setPerspective(Perspective perspective) {
         this.perspective = perspective;
+    }
+    
+    /**
+     * Sets thresholds for alpha-distinct and alpha-separation values and the showAll boolean.
+     * 
+     * @param alphaDistinct
+     * @param alphaSeparation
+     * @param showAll
+     */
+    public void setQIThresholds(double alphaDistinct, double alphaSeparation, boolean showAll) {
+    	this.distinctThreshold = alphaDistinct;
+    	this.separationThreshold = alphaSeparation;
+    	this.showAll = showAll;
+    	this.qiThresholdsSet = true;
     }
 
 	/**
