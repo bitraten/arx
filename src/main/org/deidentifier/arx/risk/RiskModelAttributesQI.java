@@ -120,8 +120,8 @@ public abstract class RiskModelAttributesQI {
         	// Calculate quasiIdentifier measures
         	for (Set<String> candidate : candidates) {
         			QuasiIdentifierRisk cRisk = new QuasiIdentifierRisk(candidate);
-        			scores.put(candidate, cRisk);
         			if(cRisk.isQI()) {
+        				scores.put(candidate, cRisk);
         				quasiIdentifiers.add(candidate);
         			}
         	}
