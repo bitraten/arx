@@ -20,8 +20,10 @@ package org.deidentifier.arx.gui.view.impl.risk;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.deidentifier.arx.AttributeType;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.Model;
+import org.deidentifier.arx.gui.model.Model.Perspective;
 import org.deidentifier.arx.gui.model.ModelEvent;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
 import org.deidentifier.arx.gui.model.ModelRisk.ViewRiskType;
@@ -30,6 +32,7 @@ import org.deidentifier.arx.gui.view.def.ILayout;
 import org.deidentifier.arx.gui.view.def.IView;
 import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolder;
 import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButton;
+import org.deidentifier.arx.gui.view.impl.menu.DialogQuasiIdentifiers;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -61,6 +64,8 @@ public class LayoutRisksAbstract implements ILayout, IView {
     /** View */
     private final Image                      imageDisabled;
     /** View */
+    private final Image                      imageRefresh;
+    /** View */
     private final ToolItem                   buttonSubset;
     /** View */
     private final ToolItem                   buttonEnable;
@@ -82,6 +87,7 @@ public class LayoutRisksAbstract implements ILayout, IView {
         this.controller = controller;
         this.imageEnabled = controller.getResources().getManagedImage("tick.png"); //$NON-NLS-1$
         this.imageDisabled = controller.getResources().getManagedImage("cross.png"); //$NON-NLS-1$
+        this.imageRefresh = controller.getResources().getManagedImage("arrow_refresh.png"); //$NON-NLS-1$
         
         controller.addListener(ModelPart.OUTPUT, this);
         controller.addListener(ModelPart.INPUT, this);
@@ -101,6 +107,25 @@ public class LayoutRisksAbstract implements ILayout, IView {
                         }
                     });
         }
+        
+        bar.add(Resources.getMessage("StatisticsView.7"), //$NON-NLS-1$ 
+        		imageRefresh,
+        		false,
+        		new Runnable() {
+        			@Override
+        			public void run() {
+        				final DialogQuasiIdentifiers dialog = new DialogQuasiIdentifiers(null, model);
+        				dialog.create();
+        				dialog.open();
+        				
+        				// Trigger update
+        				controller.update(new ModelEvent(this,
+        												 ModelPart.SELECTED_QUASI_IDENTIFIERS,
+        												 model.getSelectedQuasiIdentifiers()
+        												 )
+        				);
+        			}
+        });
         
         bar.add(Resources.getMessage("StatisticsView.3"), //$NON-NLS-1$ 
                 imageEnabled,
